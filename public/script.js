@@ -45,6 +45,7 @@ function getBlogposts (url) {
         method: 'GET'
     })
     .then(function (res) {
+      console.log(res)
         res.json()
         .then(function (json) {
             console.log(json);
