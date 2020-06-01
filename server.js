@@ -1,23 +1,22 @@
-var express = require('express');
 var formidable = require('express-formidable');
+var express = require('express');
 var fs = require('fs');
 
 var app = express();
 app.use(formidable());
 
-const readFile = fn => {
-  fs.readFile(`${__dirname}/data/posts.json`, fn)
-}
+const dataBasePath = `${__dirname}/data/posts.json`
+
+const readFileAndDo = fn => fs.readFile(dataBasePath, fn)
 
 const addNewPosts = (post, filePath, callback) => {
-  readFile((error, file) => {
+  readFileAndDo((error, file) => {
     const posts = JSON.parse(file)
-
     let date = Date.now()
     const newPost = {}
     newPost[date] = post['blogpost']
-
     const data = Object.assign(posts, newPost)
+
     fs.writeFile(filePath, JSON.stringify(data), callback)
   })
 }
@@ -26,7 +25,9 @@ const addNewPosts = (post, filePath, callback) => {
 app.post("/create-post", (req, res) => {
     const post = req.fields;
     const filePath = 'data/posts.json';
-    const callback = error => error ? console.log('Hubo un error!'): console.log('Post guardado con existo!')
+    const callback = error => error ?
+      console.log('Error!: ', error):
+      console.log('Post saved!', post)
 
     addNewPosts(post, filePath, callback)
     res.send('ok')
@@ -34,8 +35,8 @@ app.post("/create-post", (req, res) => {
 
 
 app.get("/get-posts", (req, res) => {
-  readFile((error, file) => {
-    return res.sendFile(__dirname + '/data/posts.json')
+  readFileAndDo((error, file) => {
+    return res.sendFile(dataBasePath)
   })
 })
 
